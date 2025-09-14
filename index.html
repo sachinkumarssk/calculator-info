@@ -1,0 +1,397 @@
+
+ <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+    <!-- <link rel="stylesheet" href="style.css" /> -->
+    <style>
+         @import url('https://fonts.googleapis.com/css2?family=Jura:wght@300&display=swap');
+
+* {
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
+}
+
+.main {
+  width: 400px;
+  height: 600px;
+
+  display: grid;
+  justify-content: stretch;
+  align-content: stretch;
+
+  margin: auto;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: white;
+}
+
+.calculator {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 4fr;
+
+  background: rgb(52, 52, 52);
+  background: linear-gradient(
+    180deg,
+    rgba(52, 52, 52, 1) 0%,
+    rgba(0, 0, 0, 1) 55%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  border-radius: 35px;
+}
+
+.display {
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.input-field {
+  width: 350px;
+  font-family: 'Jura', sans-serif;
+  font-size: 40px;
+  padding-right: 27px;
+  text-align: right;
+  color: white;
+  border: none;
+  border-bottom: #ffc700 solid 1px;
+  background-color: inherit;
+}
+
+.upper-field {
+  width: 350px;
+  font-family: 'Jura', sans-serif;
+  font-size: 18px;
+  padding-right: 27px;
+  text-align: right;
+  color: white;
+  border: none;
+  background-color: inherit;
+}
+
+input:focus {
+  outline: none;
+}
+
+.keyboard {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+
+  padding: 15px;
+}
+
+.btn {
+  border-radius: 10px;
+  border: none;
+  background-color: inherit;
+  color: white;
+  font-size: 24px;
+  font-family: 'Jura', sans-serif;
+}
+
+.btn:hover {
+  background-color: rgb(62, 62, 62);
+}
+
+.btn:active {
+  background-color: inherit;
+}
+
+#clear {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+#clear:hover {
+  background-color: orangered;
+}
+ #clear:active {
+  background-color: white;
+}
+
+#clear-all {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+#clear-all:hover {
+  background-color: orange;
+}
+
+#clear-all:active {
+  background-color: white;
+}
+
+#divide {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+#multiply {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+#subtract {
+  grid-column: 4;
+  grid-row: 2;
+}
+
+#add {
+  grid-column: 4;
+  grid-row: 3;
+}
+
+#equals {
+  grid-column: 4;
+  grid-row: 4 / 6;
+  color: #ffc700;
+}
+
+#decimal {
+  grid-column: 3;
+  grid-row: 5;
+}
+
+#zero {
+  grid-column: 1 / 3;
+  grid-row: 5;
+} 
+
+
+
+
+
+    </style>
+  </head>
+  <body>
+    <form class="main">
+      <div class="calculator">
+        <div class="display">
+          <input disabled type="text" class="upper-field" />
+          <input disabled type="text" value="0" class="input-field" />
+        </div>
+        <div class="keyboard">
+        
+          <button class="btn number">9</button>
+          <button class="btn number">8</button>
+          <button class="btn number">7</button>
+          <button class="btn number">4</button>
+          <button class="btn number">5</button>
+          <button class="btn number">6</button>
+          <button class="btn number">1</button>
+          <button class="btn number">2</button>
+          <button class="btn number">3</button>
+          <button class="btn number" id="zero">0</button>
+          
+          <button class="btn operator" id="divide">/</button>
+          <button class="btn operator" id="multiply">*</button>
+          <button class="btn operator" id="subtract">-</button>
+          <button class="btn operator" id="add">+</button>
+          <button class="btn" id="decimal">.</button>
+          <button class="btn operator" id="equals">=</button>
+    
+          <button class="btn clear" id="clear">CE</button>
+          <button class="btn clear" id="clear-all">C</button>
+        </div>
+      </div>
+    </form>
+    <script>
+      'use strict';
+
+// Variables
+
+const buttons = document.querySelector('.keyboard');
+const display = document.querySelector('.input-field');
+const decimalBtn = document.getElementById('decimal');
+const clearEsc = document.getElementById('clear-all');
+const clearBtn = document.querySelectorAll('.clear');
+const upperField = document.querySelector('.upper-field');
+
+let currentNumber = 0;
+let upperCurrentNumber = '';
+let newNumber = false;
+let pendingOperation = '';
+
+// FUNCTIONS
+
+// Display number
+
+function inputNumber(value) {
+  if (newNumber) {
+    upperField.value += pendingOperation;
+    display.value = value;
+    newNumber = false;
+  } else {
+    if (display.value === '0') {
+      display.value = value;
+    } else {
+      display.value += value;
+    }
+  }
+}
+
+// Display operator
+
+function inputOperation(operation) {
+  let localNumber = +display.value;
+
+  if (newNumber && pendingOperation !== '=') {
+    upperField.value = currentNumber;
+    display.value = operation;
+  } else {
+    newNumber = true;
+    if (pendingOperation === '+') {
+      currentNumber += Math.round(localNumber * 100) / 100;
+    } else if (pendingOperation === '-') {
+      currentNumber -= Math.round(localNumber * 100) / 100;
+    } else if (pendingOperation === '*') {
+      currentNumber *= Math.round(localNumber * 100) / 100;
+    } else if (pendingOperation === '/') {
+      currentNumber /= Math.round(localNumber * 100) / 100;
+    } else {
+      currentNumber = Math.round(localNumber * 100) / 100;
+    }
+    if (
+      upperField.value.endsWith('+') ||
+      upperField.value.endsWith('-') ||
+      upperField.value.endsWith('*') ||
+      upperField.value.endsWith('/')
+    ) {
+      upperField.value += localNumber;
+      display.value = Math.round(currentNumber * 100) / 100;
+      pendingOperation = operation;
+    } else {
+      upperField.value = currentNumber;
+      if (operation === '=') {
+        display.value = currentNumber;
+        upperField.value = 'The result is ↓';
+      } else {
+        display.value = operation;
+      }
+      pendingOperation = operation;
+    }
+  }
+}
+
+
+
+function inputOperation(operation) {
+  let localNumber = +display.value;
+
+  if (newNumber && pendingOperation !== '=') {
+    display.value = currentNumber;
+  } else {
+    newNumber = true;
+    if (pendingOperation === '+') {
+      currentNumber += Math.round(localNumber * 100) / 100;
+    } else if (pendingOperation === '-') {
+      currentNumber -= Math.round(localNumber * 100) / 100;
+    } else if (pendingOperation === '*') {
+      currentNumber *= Math.round(localNumber * 100) / 100;
+    } else if (pendingOperation === '/') {
+      currentNumber /= Math.round(localNumber * 100) / 100;
+    } else {
+      currentNumber = localNumber;
+    }
+
+    display.value = currentNumber;
+    pendingOperation = operation;
+  }
+}
+
+
+
+// Decimal
+
+function decimal() {
+  let localDecimal = display.value;
+
+  if (newNumber) {
+    localDecimal = '0.';
+    newNumber = false;
+  } else {
+    if (localDecimal.indexOf('.') === -1) {
+      localDecimal += '.';
+    }
+  }
+  display.value = localDecimal;
+}
+
+// Clear
+
+function clear(id) {
+  if (id === 'clear') {
+    display.value = '0';
+    upperField.value = '';
+    newNumber = true;
+  } else if (id === 'clear-all') {
+    display.value = '0';
+    newNumber = true;
+    currentNumber = 0;
+    upperField.value = '';
+    pendingOperation = '';
+  }
+}
+
+// EVENTS
+
+buttons.addEventListener('click', function (e) {
+  if (e.target.classList.contains('number')) {
+    inputNumber(e.target.textContent);
+  }
+});
+
+document.addEventListener('keydown', function (e) {
+  if (isFinite(e.key)) {
+    inputNumber(e.key);
+  } else if (
+    e.key === '*' ||
+    e.key === '/' ||
+    e.key === '+' ||
+    e.key === '-' ||
+    e.key === '='
+  ) {
+    inputOperation(e.key);
+  } else if (e.key === '.') {
+    decimal();
+  } else if (e.key === 'Backspace') {
+    clear('clear-all');
+  } else if (e.key === 'Enter') {
+    e.key === '=';
+    inputOperation('=');
+  }
+});
+
+buttons.addEventListener('click', function (e) {
+  if (e.target.classList.contains('operator')) {
+    inputOperation(e.target.textContent);
+  }
+});
+
+buttons.addEventListener('click', function (e) {
+  e.preventDefault();
+  if (e.target.classList.contains('clear')) {
+    clear(e.srcElement.id);
+  }
+});
+
+decimalBtn.addEventListener('click', decimal);
+
+
+
+    </script>
+    <!-- <script type="text/javascript" src="script.js"></script> -->
+  </body>
+</html> 
+
+
+
